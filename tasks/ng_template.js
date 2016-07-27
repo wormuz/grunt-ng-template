@@ -16,7 +16,8 @@ module.exports = function (grunt) {
             partials: [],
             comment_line: '<!-- ng:templates -->' + grunt.util.linefeed + '<% content %>' + grunt.util.linefeed + '<!-- end ng:templates -->',
             PATH: require('path'),
-            appDir_path: require('path').resolve(this.options().appDir)
+            appDir_path: require('path').resolve(this.options().appDir),
+            endTag: this.options().endTag
         },
             BASE_FILE = this.options().appDir + '/' + this.options().indexFile,
             ABS_PATH = process.cwd();
@@ -56,33 +57,25 @@ module.exports = function (grunt) {
 
             }).map(function (filepath) {
 
-                function processTemplate(abspath, filename) {
-                    if (filename.indexOf('.html') > -1) {
+                if (grunt.file.isDir(filepath)) {
+
+                    grunt.file.recurse(filepath, function (abspath, rootdir, subdir, filename) {
+
+                        if (filename.indexOf('.html') > -1) {
 
                             grunt.log.ok(configs.PATH.resolve(abspath).replace(configs.appDir_path, '').replace(/^\//, ''));
 
-                            var _filename = configs.PATH.resolve(abspath).replace(configs.appDir_path, '')
-                            		.replace(/\\/g, '/')
-                            		.replace(/^\//, ''),
+                            var _filename = configs.PATH.resolve(abspath).replace(configs.appDir_path, '').replace(/^\//, ''),
                                 content = grunt.file.read(configs.PATH.resolve(abspath)),
                                 parsed = configs.TEMPLATE.replace('<% filename %>', _filename).replace('<% content %>', content);
 
                             configs.partials.push(parsed);
 
                         }
-                }
 
-                if (grunt.file.isDir(filepath)) {
-
-                    grunt.file.recurse(filepath, function (abspath, rootdir, subdir, filename) {
-                        processTemplate(abspath, filename);
                     });
 
-                } 
-                else if (grunt.file.isFile(filepath)) {
-                    processTemplate(filepath, filepath.split(/(\\|\/)/g).pop());
-                }
-                else {
+                } else {
                     grunt.fail.warn(filepath + ' is an invalid directory');
                 }
 
@@ -92,7 +85,7 @@ module.exports = function (grunt) {
 
         var new_content = configs.partials.reverse().join(grunt.util.linefeed),
             old_file = grunt.file.read(BASE_FILE),
-            BODY_END = old_file.search('</body>'),
+            BODY_END = configs.endTag ? old_file.search(configs.endTag) : old_file.search('</body>'),
             _begin = old_file.substring(0, BODY_END),
             _end = old_file.substring(BODY_END);
 
