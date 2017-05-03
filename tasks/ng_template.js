@@ -86,8 +86,8 @@ module.exports = function (grunt) {
         var new_content = configs.partials.reverse().join(grunt.util.linefeed),
             old_file = grunt.file.read(BASE_FILE),
             BODY_END = configs.endTag ? old_file.search(configs.endTag) : old_file.search('</body>'),
-            _begin = old_file.substring(0, BODY_END),
-            _end = old_file.substring(BODY_END);
+            _begin = BODY_END > -1 ? old_file.substring(0, BODY_END) : old_file,
+            _end = BODY_END > -1 ? old_file.substring(BODY_END) : '';
 
         if (this.options().concat) {
             new_content = new_content.replace(new RegExp("\>[\n\t ]+\<", "g"), "><");
