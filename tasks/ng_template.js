@@ -63,9 +63,13 @@ module.exports = function (grunt) {
 
                         if (filename.indexOf('.html') > -1) {
 
-                            grunt.log.ok(configs.PATH.resolve(abspath).replace(configs.appDir_path, '').replace(/^\//, ''));
+                            grunt.log.ok(configs.PATH.resolve(abspath)
+                                .replace(configs.appDir_path, '')
+                                .replace(!!(configs.viewsDir) ? new RegExp(`^\/${configs.viewsDir}\/`) : /^\//, ''));
 
-                            var _filename = configs.PATH.resolve(abspath).replace(configs.appDir_path, '').replace(/^\//, ''),
+                            var _filename = configs.PATH.resolve(abspath)
+                                    .replace(configs.appDir_path, '')
+                                    .replace(!!(configs.viewsDir) ? new RegExp(`^\/${configs.viewsDir}\/`) : /^\//, ''),
                                 content = grunt.file.read(configs.PATH.resolve(abspath)),
                                 parsed = configs.TEMPLATE.replace('<% filename %>', _filename).replace('<% content %>', content);
 
